@@ -1,0 +1,1372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0c0c15">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="NutriCore">
+<meta name="description" content="NutriCore – Your SA Nutrition App by Freedomverse">
+<title>NutriCore – Freedomverse</title>
+<link href="https://fonts.googleapis.com/css2?family=Righteous&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* =============================================
+   CSS VARIABLES & RESET
+   ============================================= */
+:root {
+  --bg:        #0c0c15;
+  --surface:   #13131f;
+  --card:      #1a1a28;
+  --card2:     #20202f;
+  --border:    #2c2c3e;
+  --green:     #00e676;
+  --green2:    #00c853;
+  --green-dim: rgba(0,230,118,0.1);
+  --gold:      #ffd740;
+  --gold-dim:  rgba(255,215,64,0.1);
+  --blue:      #4fc3f7;
+  --purple:    #b39ddb;
+  --red:       #ff5252;
+  --text:      #f0f0f8;
+  --muted:     #7070a0;
+  --nav-h:     68px;
+  --top-h:     54px;
+  --r:         16px;
+  --r-sm:      10px;
+  --df:        'Righteous', cursive;
+  --bf:        'Nunito', sans-serif;
+}
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; overflow: hidden; overscroll-behavior: none; }
+body { background: var(--bg); color: var(--text); font-family: var(--bf); font-size: 15px; line-height: 1.5; }
+input, button { font-family: var(--bf); }
+button { cursor: pointer; }
+
+/* =============================================
+   SPLASH SCREEN
+   ============================================= */
+#splash {
+  position: fixed; inset: 0; z-index: 9999;
+  background: var(--bg);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 0;
+  transition: opacity 0.7s ease, visibility 0.7s ease;
+}
+#splash.hide { opacity: 0; visibility: hidden; pointer-events: none; }
+
+.sp-orb {
+  width: 110px; height: 110px;
+  border-radius: 50%;
+  position: relative;
+  margin-bottom: 28px;
+  animation: orbAppear 0.5s ease forwards;
+}
+.sp-orb::before, .sp-orb::after {
+  content: ''; position: absolute; inset: 0;
+  border-radius: 50%; border: 3px solid transparent;
+}
+.sp-orb::before {
+  border-top-color: var(--green);
+  border-right-color: var(--green);
+  animation: spinA 1s linear infinite;
+}
+.sp-orb::after {
+  inset: 8px;
+  border-bottom-color: var(--gold);
+  border-left-color: var(--gold);
+  animation: spinB 0.7s linear infinite reverse;
+}
+.sp-inner {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 36px;
+  animation: fadeUp 0.6s 0.4s ease both;
+}
+@keyframes spinA { to { transform: rotate(360deg); } }
+@keyframes spinB { to { transform: rotate(360deg); } }
+@keyframes orbAppear { from { opacity: 0; transform: scale(0.3); } to { opacity: 1; transform: scale(1); } }
+
+.sp-brand {
+  font-family: var(--df);
+  font-size: 32px; letter-spacing: 4px;
+  background: linear-gradient(135deg, var(--green) 0%, var(--gold) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  animation: fadeUp 0.5s 0.3s ease both;
+}
+.sp-tag {
+  font-size: 11px; letter-spacing: 5px; text-transform: uppercase;
+  color: var(--muted); margin-top: 5px;
+  animation: fadeUp 0.5s 0.5s ease both;
+}
+.sp-appname {
+  margin-top: 22px; padding: 8px 24px;
+  border: 1px solid var(--border); border-radius: 30px;
+  font-family: var(--df); font-size: 19px; color: var(--green);
+  letter-spacing: 1px;
+  animation: fadeUp 0.5s 0.7s ease both;
+  background: var(--green-dim);
+}
+.sp-dots {
+  display: flex; gap: 6px; margin-top: 28px;
+  animation: fadeUp 0.5s 0.9s ease both;
+}
+.sp-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--border);
+}
+.sp-dot:nth-child(1) { animation: dotPulse 1.2s 1s ease infinite; }
+.sp-dot:nth-child(2) { animation: dotPulse 1.2s 1.2s ease infinite; }
+.sp-dot:nth-child(3) { animation: dotPulse 1.2s 1.4s ease infinite; }
+@keyframes dotPulse { 0%,100%{background:var(--border)} 50%{background:var(--green)} }
+@keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:none} }
+
+/* =============================================
+   APP SHELL
+   ============================================= */
+#app {
+  position: fixed; inset: 0;
+  display: flex; flex-direction: column;
+}
+
+/* TOP BAR */
+.topbar {
+  height: var(--top-h); flex-shrink: 0;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center;
+  padding: 0 16px; gap: 10px;
+}
+.tb-logo {
+  font-family: var(--df); font-size: 21px;
+  background: linear-gradient(135deg, var(--green), var(--gold));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.tb-pill {
+  font-size: 9px; font-weight: 900; letter-spacing: 0.5px;
+  background: var(--green); color: #000;
+  padding: 2px 7px; border-radius: 20px;
+}
+#premBadge { display: none; background: var(--gold); color: #000; }
+.tb-right { margin-left: auto; font-size: 10px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+
+/* SCROLL AREA */
+#scroll-area {
+  flex: 1; overflow-y: auto; overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+#scroll-area::-webkit-scrollbar { display: none; }
+
+/* =============================================
+   SECTIONS
+   ============================================= */
+.section {
+  display: none; padding: 16px 14px 20px;
+  animation: secIn 0.25s ease;
+  min-height: calc(100% - 20px);
+}
+.section.active { display: block; }
+@keyframes secIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
+
+/* =============================================
+   COMMON COMPONENTS
+   ============================================= */
+.card {
+  background: var(--card); border-radius: var(--r);
+  border: 1px solid var(--border); padding: 16px;
+  margin-bottom: 14px;
+}
+.c-label {
+  font-size: 11px; text-transform: uppercase;
+  letter-spacing: 1.5px; color: var(--muted);
+  margin-bottom: 12px; font-weight: 700;
+}
+.nc-input {
+  width: 100%;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r-sm); padding: 12px 14px;
+  color: var(--text); font-size: 15px; outline: none;
+  transition: border-color 0.2s;
+}
+.nc-input:focus { border-color: var(--green); }
+.btn-primary {
+  width: 100%; padding: 13px;
+  background: linear-gradient(135deg, var(--green2), var(--green));
+  border: none; border-radius: 12px;
+  color: #000; font-size: 15px; font-weight: 900;
+  transition: transform 0.1s, opacity 0.1s;
+}
+.btn-primary:active { transform: scale(0.97); opacity: 0.88; }
+.sec-heading {
+  font-family: var(--df); font-size: 20px;
+  color: var(--text); margin-bottom: 14px;
+  display: flex; align-items: center; gap: 8px;
+}
+.pill {
+  display: inline-flex; align-items: center;
+  padding: 3px 10px; border-radius: 20px;
+  font-size: 11px; font-weight: 700;
+  border: 1px solid var(--border); color: var(--muted);
+}
+.pill.green { border-color: var(--green); color: var(--green); background: var(--green-dim); }
+.pill.gold { border-color: var(--gold); color: var(--gold); background: var(--gold-dim); }
+
+/* =============================================
+   HOME SECTION
+   ============================================= */
+.greeting-card {
+  background: linear-gradient(135deg, rgba(0,230,118,0.07), rgba(255,215,64,0.05));
+  border-radius: var(--r); border: 1px solid var(--border);
+  padding: 18px; margin-bottom: 14px;
+}
+.greet-name {
+  font-family: var(--df); font-size: 24px;
+  background: linear-gradient(135deg, var(--green), var(--gold));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.greet-sub { color: var(--muted); font-size: 13px; margin-top: 3px; }
+.greet-pills { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+
+/* Water Tracker */
+.water-num {
+  font-family: var(--df); font-size: 56px;
+  color: var(--blue); text-align: center; line-height: 1;
+}
+.water-sub { text-align: center; color: var(--muted); font-size: 12px; margin: 4px 0 14px; }
+.glasses-row {
+  display: flex; justify-content: center;
+  gap: 6px; flex-wrap: wrap; margin-bottom: 16px;
+}
+.g-icon {
+  font-size: 24px; opacity: 0.2;
+  transition: all 0.2s; cursor: pointer;
+}
+.g-icon.on { opacity: 1; filter: drop-shadow(0 0 5px var(--blue)); }
+.water-btns { display: flex; gap: 10px; }
+.btn-water {
+  flex: 1; padding: 12px; border-radius: 12px;
+  border: none; font-size: 14px; font-weight: 800;
+  transition: transform 0.1s;
+}
+.btn-water:active { transform: scale(0.96); }
+.btn-add { background: var(--blue); color: #000; }
+.btn-rem { background: var(--card2); border: 1px solid var(--border); color: var(--text); }
+
+/* BMI Card */
+.bmi-row { display: flex; gap: 10px; margin-bottom: 12px; }
+.bmi-group { flex: 1; }
+.bmi-group label { display: block; font-size: 11px; color: var(--muted); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; }
+.bmi-result-box {
+  display: none; margin-top: 12px;
+  background: var(--surface); border-radius: 12px;
+  padding: 14px; text-align: center;
+}
+.bmi-num { font-family: var(--df); font-size: 42px; }
+.bmi-cat { font-size: 14px; margin-top: 3px; }
+
+/* Stats mini grid */
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+.stat-tile {
+  background: var(--card); border-radius: var(--r);
+  border: 1px solid var(--border); padding: 14px;
+  text-align: center;
+}
+.stat-icon { font-size: 26px; }
+.stat-val { font-family: var(--df); font-size: 20px; margin: 4px 0; }
+.stat-desc { font-size: 11px; color: var(--muted); }
+
+/* =============================================
+   MEALS SECTION
+   ============================================= */
+.search-wrap { position: relative; margin-bottom: 16px; }
+.search-wrap input {
+  width: 100%;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 12px; padding: 12px 16px 12px 42px;
+  color: var(--text); font-size: 15px; outline: none;
+  transition: border-color 0.2s;
+}
+.search-wrap input:focus { border-color: var(--green); }
+.search-ico {
+  position: absolute; left: 14px; top: 50%;
+  transform: translateY(-50%); font-size: 16px;
+}
+.cat-group { margin-bottom: 22px; }
+.cat-label {
+  font-size: 12px; font-weight: 800; text-transform: uppercase;
+  letter-spacing: 1.2px; color: var(--gold);
+  margin-bottom: 10px; display: flex; align-items: center; gap: 8px;
+}
+.cat-label::after { content:''; flex:1; height:1px; background:var(--border); }
+.meal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.meal-tile {
+  background: var(--card); border-radius: 12px;
+  border: 1px solid var(--border); padding: 13px 11px;
+  transition: border-color 0.15s, transform 0.12s;
+}
+.meal-tile:active { transform: scale(0.97); border-color: var(--green); }
+.m-emoji { font-size: 26px; margin-bottom: 5px; }
+.m-name { font-weight: 800; font-size: 13px; line-height: 1.3; }
+.m-desc { font-size: 11px; color: var(--muted); margin-top: 2px; line-height: 1.4; }
+.m-cals { font-size: 11px; color: var(--green); margin-top: 5px; font-weight: 700; }
+
+/* =============================================
+   LEARN SECTION
+   ============================================= */
+.recipe-card {
+  background: var(--card); border-radius: var(--r);
+  border: 1px solid var(--border); margin-bottom: 12px;
+  overflow: hidden; transition: border-color 0.2s;
+}
+.recipe-card.open { border-color: rgba(0,230,118,0.35); }
+.rc-head {
+  display: flex; align-items: flex-start;
+  gap: 13px; padding: 14px; cursor: pointer;
+}
+.rc-emo { font-size: 32px; flex-shrink: 0; }
+.rc-meta { flex: 1; min-width: 0; }
+.rc-name { font-weight: 900; font-size: 15px; }
+.rc-pills { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 4px; }
+.rc-pill {
+  font-size: 10px; padding: 1px 7px; border-radius: 20px;
+  background: var(--surface); border: 1px solid var(--border);
+  color: var(--muted); font-weight: 700;
+}
+.rc-pill.g { border-color: var(--green); color: var(--green); background: var(--green-dim); }
+.rc-info { font-size: 11px; color: var(--muted); margin-top: 4px; }
+.rc-arrow { color: var(--muted); font-size: 16px; transition: transform 0.2s; flex-shrink: 0; align-self: center; }
+.recipe-card.open .rc-arrow { transform: rotate(180deg); }
+.rc-body {
+  display: none; padding: 14px;
+  border-top: 1px solid var(--border);
+  animation: secIn 0.2s ease;
+}
+.recipe-card.open .rc-body { display: block; }
+.rc-stitle { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin: 12px 0 7px; font-weight: 800; }
+.rc-stitle:first-child { margin-top: 0; }
+.ingr-list { display: flex; flex-direction: column; gap: 5px; }
+.ingr { display: flex; align-items: flex-start; gap: 8px; font-size: 14px; }
+.ingr::before { content: '•'; color: var(--green); font-size: 16px; line-height: 1.3; flex-shrink: 0; }
+.steps-list { display: flex; flex-direction: column; gap: 10px; }
+.step-row { display: flex; gap: 10px; font-size: 14px; line-height: 1.55; }
+.step-n {
+  min-width: 22px; height: 22px; border-radius: 50%;
+  background: var(--green); color: #000;
+  font-size: 11px; font-weight: 900;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; margin-top: 2px;
+}
+
+/* =============================================
+   QUICK SECTION
+   ============================================= */
+.quick-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.q-tile {
+  background: var(--card); border-radius: 14px;
+  border: 1px solid var(--border); padding: 15px 13px;
+  display: flex; flex-direction: column; gap: 5px;
+}
+.q-emo { font-size: 28px; }
+.q-name { font-weight: 900; font-size: 14px; }
+.q-time { font-size: 12px; color: var(--green); font-weight: 700; }
+.q-desc { font-size: 12px; color: var(--muted); line-height: 1.45; }
+
+/* =============================================
+   PROFILE SECTION
+   ============================================= */
+.prof-top {
+  display: flex; flex-direction: column;
+  align-items: center; padding: 24px 16px 18px;
+  background: linear-gradient(135deg, rgba(0,230,118,0.06), rgba(255,215,64,0.04));
+  border-radius: var(--r); border: 1px solid var(--border);
+  margin-bottom: 14px;
+}
+.prof-avatar {
+  width: 80px; height: 80px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--green), var(--gold));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 34px; border: 3px solid var(--border);
+  margin-bottom: 12px;
+}
+.prof-name-disp {
+  font-family: var(--df); font-size: 22px;
+  background: linear-gradient(135deg, var(--green), var(--gold));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.prof-pills { display: flex; gap: 7px; flex-wrap: wrap; justify-content: center; margin-top: 8px; }
+.prof-form { display: flex; flex-direction: column; gap: 12px; }
+.prof-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.form-group label { display: block; font-size: 11px; color: var(--muted); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; }
+.stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; text-align: center; }
+.st-val { font-family: var(--df); font-size: 20px; }
+.st-lbl { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+/* =============================================
+   PREMIUM SECTION
+   ============================================= */
+
+/* — Upgrade flow — */
+.prem-hero {
+  text-align: center; padding: 26px 16px 20px;
+  background: linear-gradient(135deg, rgba(0,230,118,0.07), rgba(255,215,64,0.07));
+  border-radius: var(--r); border: 1px solid var(--border);
+  margin-bottom: 14px;
+}
+.prem-crown { font-size: 46px; animation: float 2.5s ease-in-out infinite; margin-bottom: 8px; }
+@keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-9px)} }
+.prem-title { font-family: var(--df); font-size: 22px; color: var(--text); }
+.prem-price {
+  font-family: var(--df); font-size: 42px;
+  background: linear-gradient(135deg, var(--gold), #ffab40);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  margin-top: 6px;
+}
+.prem-price span { font-size: 20px; }
+.prem-price-sub { color: var(--muted); font-size: 12px; margin-top: 3px; }
+.feat-list { display: flex; flex-direction: column; gap: 10px; }
+.feat-item { display: flex; align-items: center; gap: 12px; font-size: 14px; }
+.feat-ico { font-size: 20px; flex-shrink: 0; width: 28px; }
+
+/* Steps */
+.prem-steps { display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; }
+.prem-step {
+  background: var(--card); border-radius: var(--r);
+  border: 1px solid var(--border); padding: 16px;
+}
+.ps-head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.ps-num {
+  width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--green2), var(--green));
+  color: #000; font-size: 13px; font-weight: 900;
+  display: flex; align-items: center; justify-content: center;
+}
+.ps-title { font-weight: 900; font-size: 15px; }
+.bank-box {
+  background: var(--surface); border-radius: 10px;
+  padding: 12px; margin-bottom: 12px;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.bank-row { display: flex; justify-content: space-between; font-size: 13px; }
+.bk { color: var(--muted); }
+.bv { font-weight: 800; color: var(--text); }
+.step-note { font-size: 13px; color: var(--muted); line-height: 1.5; margin-bottom: 10px; }
+.btn-wa {
+  width: 100%; padding: 13px;
+  background: #25d366; border: none; border-radius: 12px;
+  color: #fff; font-size: 15px; font-weight: 900;
+  display: flex; align-items: center; justify-content: center;
+  gap: 8px; transition: transform 0.1s, opacity 0.1s;
+}
+.btn-wa:active { transform: scale(0.97); opacity: 0.88; }
+.code-row { display: flex; gap: 10px; }
+.code-row input {
+  flex: 1; background: var(--surface);
+  border: 1px solid var(--border); border-radius: 10px;
+  padding: 12px 14px; color: var(--text); font-size: 15px;
+  outline: none; text-transform: uppercase; letter-spacing: 2px;
+  transition: border-color 0.2s;
+}
+.code-row input:focus { border-color: var(--green); }
+.btn-unlock {
+  padding: 12px 16px;
+  background: linear-gradient(135deg, var(--green2), var(--green));
+  border: none; border-radius: 10px; color: #000;
+  font-size: 14px; font-weight: 900; white-space: nowrap;
+  transition: transform 0.1s;
+}
+.btn-unlock:active { transform: scale(0.97); }
+.unlock-msg { font-size: 13px; margin-top: 8px; min-height: 18px; text-align: center; }
+.unlock-msg.err { color: var(--red); }
+.unlock-msg.ok  { color: var(--green); }
+
+/* — Active premium screen — */
+#premActiveSc {
+  display: none; text-align: center;
+  padding: 32px 16px 20px;
+  animation: secIn 0.3s ease;
+}
+#premActiveSc.show { display: block; }
+.prem-act-crown { font-size: 64px; animation: float 2s ease-in-out infinite; margin-bottom: 14px; }
+.prem-act-title { font-family: var(--df); font-size: 30px; color: var(--gold); margin-bottom: 6px; }
+.prem-act-sub { color: var(--muted); font-size: 14px; line-height: 1.65; }
+.perk-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; text-align: left; }
+.perk-tile {
+  background: var(--card); border-radius: 12px;
+  border: 1px solid var(--border); padding: 14px;
+}
+.pk-ico { font-size: 22px; margin-bottom: 5px; }
+.pk-lbl { font-size: 12px; font-weight: 800; line-height: 1.3; }
+.btn-revoke {
+  margin: 22px auto 0; display: block; max-width: 200px;
+  padding: 12px; background: transparent;
+  border: 1px solid var(--border); border-radius: 12px;
+  color: var(--muted); font-size: 13px; font-weight: 700;
+  transition: border-color 0.2s, color 0.2s;
+}
+.btn-revoke:active { border-color: var(--red); color: var(--red); }
+
+/* =============================================
+   BOTTOM NAV
+   ============================================= */
+.bottom-nav {
+  height: var(--nav-h); flex-shrink: 0;
+  background: var(--surface); border-top: 1px solid var(--border);
+  display: flex; align-items: stretch;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.nav-btn {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 3px; background: none; border: none;
+  padding: 6px 2px 4px; position: relative;
+  transition: transform 0.12s;
+}
+.nav-btn:active { transform: scale(0.88); }
+.nav-ico { font-size: 20px; transition: transform 0.2s; }
+.nav-lbl {
+  font-size: 10px; font-weight: 800;
+  color: var(--muted); letter-spacing: 0.2px;
+  transition: color 0.15s;
+}
+.nav-btn.active .nav-lbl { color: var(--green); }
+.nav-btn.active .nav-ico { transform: translateY(-2px); }
+.nav-btn.active::after {
+  content: ''; position: absolute; top: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 28px; height: 3px;
+  background: var(--green);
+  border-radius: 0 0 4px 4px;
+}
+.nav-btn[data-tab="premium"].active .nav-lbl { color: var(--gold); }
+.nav-btn[data-tab="premium"].active::after { background: var(--gold); }
+
+/* =============================================
+   MISC UTILITIES
+   ============================================= */
+.mt8 { margin-top: 8px; }
+.mt12 { margin-top: 12px; }
+.row { display: flex; gap: 10px; }
+.row > * { flex: 1; }
+</style>
+</head>
+<body>
+
+<!-- =============================================
+     SPLASH SCREEN
+     ============================================= -->
+<div id="splash">
+  <div class="sp-orb"><div class="sp-inner">🥗</div></div>
+  <div class="sp-brand">FREEDOMVERSE</div>
+  <div class="sp-tag">Building the Future</div>
+  <div class="sp-appname">✦ NutriCore ✦</div>
+  <div class="sp-dots">
+    <div class="sp-dot"></div>
+    <div class="sp-dot"></div>
+    <div class="sp-dot"></div>
+  </div>
+</div>
+
+<!-- =============================================
+     APP
+     ============================================= -->
+<div id="app">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <span class="tb-logo">NutriCore</span>
+    <span class="tb-pill">BETA</span>
+    <span class="tb-pill" id="premBadge">PRO</span>
+    <span class="tb-right">Freedomverse</span>
+  </div>
+
+  <!-- SCROLL AREA -->
+  <div id="scroll-area">
+
+    <!-- ===== HOME ===== -->
+    <div class="section active" id="sec-home">
+
+      <div class="greeting-card">
+        <div class="greet-name" id="greetName">Hey, Champ! 👋</div>
+        <div class="greet-sub" id="greetSub">Stay hydrated & eat well today.</div>
+        <div class="greet-pills">
+          <span class="pill green" id="waterPill">💧 0/8 glasses</span>
+          <span class="pill">🇿🇦 Mzansi Edition</span>
+        </div>
+      </div>
+
+      <!-- Water Tracker -->
+      <div class="card">
+        <div class="c-label">💧 Daily Water Tracker</div>
+        <div class="water-num" id="waterNum">0</div>
+        <div class="water-sub">glasses out of 8 today</div>
+        <div class="glasses-row" id="glassesRow"></div>
+        <div class="water-btns">
+          <button class="btn-water btn-add" onclick="addWater()">+ Add Glass</button>
+          <button class="btn-water btn-rem" onclick="remWater()">– Remove</button>
+        </div>
+      </div>
+
+      <!-- BMI -->
+      <div class="card">
+        <div class="c-label">⚖️ BMI Calculator</div>
+        <div class="bmi-row">
+          <div class="bmi-group">
+            <label>Weight (kg)</label>
+            <input type="number" class="nc-input" id="bmiW" placeholder="70">
+          </div>
+          <div class="bmi-group">
+            <label>Height (cm)</label>
+            <input type="number" class="nc-input" id="bmiH" placeholder="170">
+          </div>
+        </div>
+        <button class="btn-primary" onclick="calcBMI()">Calculate BMI</button>
+        <div class="bmi-result-box" id="bmiBox">
+          <div class="bmi-num" id="bmiNum">—</div>
+          <div class="bmi-cat" id="bmiCat"></div>
+          <div style="font-size:12px;color:var(--muted);margin-top:6px" id="bmiTip"></div>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-grid">
+        <div class="stat-tile">
+          <div class="stat-icon">🔥</div>
+          <div class="stat-val" id="statCals" style="color:var(--green)">—</div>
+          <div class="stat-desc">Daily kcal goal</div>
+        </div>
+        <div class="stat-tile">
+          <div class="stat-icon">💧</div>
+          <div class="stat-val" style="color:var(--blue)">2L</div>
+          <div class="stat-desc">Water target</div>
+        </div>
+        <div class="stat-tile">
+          <div class="stat-icon">😴</div>
+          <div class="stat-val" style="color:var(--purple)">8h</div>
+          <div class="stat-desc">Sleep goal</div>
+        </div>
+        <div class="stat-tile">
+          <div class="stat-icon">🥗</div>
+          <div class="stat-val" style="color:var(--gold)">3x</div>
+          <div class="stat-desc">Meals per day</div>
+        </div>
+      </div>
+
+    </div><!-- /home -->
+
+    <!-- ===== LEARN ===== -->
+    <div class="section" id="sec-learn">
+      <div class="sec-heading">📚 Learn to Cook</div>
+      <div id="recipeContainer"></div>
+    </div>
+
+    <!-- ===== MEALS ===== -->
+    <div class="section" id="sec-meals">
+      <div class="search-wrap">
+        <span class="search-ico">🔍</span>
+        <input type="text" id="mealSearch" placeholder="Search Mzansi meals..." oninput="filterMeals()">
+      </div>
+      <div id="mealsContainer"></div>
+    </div>
+
+    <!-- ===== QUICK ===== -->
+    <div class="section" id="sec-quick">
+      <div class="sec-heading">⚡ Quick Meals</div>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:16px">Fast ideas when you're hungry & in a hurry.</p>
+      <div class="quick-grid" id="quickGrid"></div>
+    </div>
+
+    <!-- ===== PROFILE ===== -->
+    <div class="section" id="sec-profile">
+
+      <div class="prof-top">
+        <div class="prof-avatar">🧑</div>
+        <div class="prof-name-disp" id="profNameDisp">Your Name</div>
+        <div class="prof-pills">
+          <span class="pill green">🇿🇦 South Africa</span>
+          <span class="pill" id="profAgeBadge">Age —</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="c-label">Edit Profile</div>
+        <div class="prof-form">
+          <div class="form-group">
+            <label>Full Name</label>
+            <input type="text" class="nc-input" id="pName" placeholder="Your name">
+          </div>
+          <div class="prof-2col">
+            <div class="form-group">
+              <label>Age</label>
+              <input type="number" class="nc-input" id="pAge" placeholder="18">
+            </div>
+            <div class="form-group">
+              <label>Weight (kg)</label>
+              <input type="number" class="nc-input" id="pWeight" placeholder="70">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Height (cm)</label>
+            <input type="number" class="nc-input" id="pHeight" placeholder="170">
+          </div>
+          <button class="btn-primary" onclick="saveProfile()">Save Profile</button>
+        </div>
+      </div>
+
+      <div class="card" id="profStatsCard" style="display:none">
+        <div class="c-label">📊 Your Stats</div>
+        <div class="stats-row">
+          <div>
+            <div class="st-val" id="ps-bmi" style="color:var(--green)">—</div>
+            <div class="st-lbl">BMI</div>
+          </div>
+          <div>
+            <div class="st-val" id="ps-cals" style="color:var(--gold)">—</div>
+            <div class="st-lbl">kcal/day</div>
+          </div>
+          <div>
+            <div class="st-val" id="ps-water" style="color:var(--blue)">8</div>
+            <div class="st-lbl">Glasses</div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /profile -->
+
+    <!-- ===== PREMIUM ===== -->
+    <div class="section" id="sec-premium">
+
+      <!-- ACTIVE PREMIUM SCREEN -->
+      <div id="premActiveSc">
+        <div class="prem-act-crown">👑</div>
+        <div class="prem-act-title">You're Premium!</div>
+        <div class="prem-act-sub">
+          Welcome to Freedomverse Premium.<br>
+          You have full access to NutriCore.<br>
+          <span style="color:var(--green);font-weight:700">Asante. You're part of the movement.</span>
+        </div>
+        <div class="perk-grid">
+          <div class="perk-tile"><div class="pk-ico">🍽️</div><div class="pk-lbl">45+ SA Meals Database</div></div>
+          <div class="perk-tile"><div class="pk-ico">📚</div><div class="pk-lbl">All Cooking Recipes</div></div>
+          <div class="perk-tile"><div class="pk-ico">⚡</div><div class="pk-lbl">Quick Meal Ideas</div></div>
+          <div class="perk-tile"><div class="pk-ico">📊</div><div class="pk-lbl">Full Nutrition Stats</div></div>
+          <div class="perk-tile"><div class="pk-ico">🔥</div><div class="pk-lbl">Calorie Tracking</div></div>
+          <div class="perk-tile"><div class="pk-ico">💧</div><div class="pk-lbl">Hydration Insights</div></div>
+        </div>
+        <button class="btn-revoke" onclick="revokePrem()">Revoke Access</button>
+      </div>
+
+      <!-- UPGRADE SCREEN -->
+      <div id="premUpgradeSc">
+        <!-- Hero -->
+        <div class="prem-hero">
+          <div class="prem-crown">👑</div>
+          <div class="prem-title">NutriCore Premium</div>
+          <div class="prem-price">R49<span>/month</span></div>
+          <div class="prem-price-sub">One payment. Full access. Freedomverse promise.</div>
+        </div>
+
+        <!-- Features -->
+        <div class="card" style="margin-bottom:16px">
+          <div class="c-label">What you unlock</div>
+          <div class="feat-list">
+            <div class="feat-item"><span class="feat-ico">🍽️</span>All 45+ South African Meal Cards</div>
+            <div class="feat-item"><span class="feat-ico">📚</span>Step-by-step cooking recipes</div>
+            <div class="feat-item"><span class="feat-ico">⚡</span>Quick meal ideas & prep guides</div>
+            <div class="feat-item"><span class="feat-ico">📊</span>Full calorie & nutrition tracking</div>
+            <div class="feat-item"><span class="feat-ico">🔥</span>Weekly meal plans</div>
+            <div class="feat-item"><span class="feat-ico">💧</span>Hydration & wellness insights</div>
+            <div class="feat-item"><span class="feat-ico">🚫</span>Zero ads. Ever. Freedomverse promise.</div>
+          </div>
+        </div>
+
+        <!-- Steps -->
+        <div style="font-family:var(--df);font-size:18px;margin-bottom:12px;color:var(--text)">🔓 How to Unlock</div>
+        <div class="prem-steps">
+
+          <!-- Step 1 -->
+          <div class="prem-step">
+            <div class="ps-head">
+              <div class="ps-num">1</div>
+              <div class="ps-title">Make EFT Payment</div>
+            </div>
+            <div class="bank-box">
+              <div class="bank-row"><span class="bk">Bank</span><span class="bv">Standard Bank</span></div>
+              <div class="bank-row"><span class="bk">Account No.</span><span class="bv">10257742628</span></div>
+              <div class="bank-row"><span class="bk">Amount</span><span class="bv">R49.00</span></div>
+              <div class="bank-row"><span class="bk">Reference</span><span class="bv">YourName NutriCore</span></div>
+              <div class="bank-row"><span class="bk">Type</span><span class="bv">Current / Cheque</span></div>
+            </div>
+            <p class="step-note">Use your name as the reference so we can match your payment quickly.</p>
+          </div>
+
+          <!-- Step 2 -->
+          <div class="prem-step">
+            <div class="ps-head">
+              <div class="ps-num">2</div>
+              <div class="ps-title">Send Proof of Payment</div>
+            </div>
+            <p class="step-note">Screenshot your POP and send it via WhatsApp. We'll reply with your personal unlock code ASAP.</p>
+            <button class="btn-wa" onclick="openWA()">
+              <span style="font-size:18px">💬</span>
+              WhatsApp Proof of Payment
+            </button>
+          </div>
+
+          <!-- Step 3 -->
+          <div class="prem-step">
+            <div class="ps-head">
+              <div class="ps-num">3</div>
+              <div class="ps-title">Enter Your Unlock Code</div>
+            </div>
+            <p class="step-note">Paste the code we sent you below. It activates instantly on this device.</p>
+            <div class="code-row">
+              <input type="text" id="codeInput" placeholder="XXXX-XXXX">
+              <button class="btn-unlock" onclick="tryUnlock()">Unlock</button>
+            </div>
+            <div class="unlock-msg" id="unlockMsg"></div>
+          </div>
+
+        </div>
+      </div><!-- /premUpgradeSc -->
+
+    </div><!-- /premium section -->
+
+  </div><!-- /scroll-area -->
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <button class="nav-btn active" data-tab="home" onclick="go('home')">
+      <span class="nav-ico">🏠</span>
+      <span class="nav-lbl">Home</span>
+    </button>
+    <button class="nav-btn" data-tab="learn" onclick="go('learn')">
+      <span class="nav-ico">📚</span>
+      <span class="nav-lbl">Learn</span>
+    </button>
+    <button class="nav-btn" data-tab="meals" onclick="go('meals')">
+      <span class="nav-ico">🍽️</span>
+      <span class="nav-lbl">Meals</span>
+    </button>
+    <button class="nav-btn" data-tab="quick" onclick="go('quick')">
+      <span class="nav-ico">⚡</span>
+      <span class="nav-lbl">Quick</span>
+    </button>
+    <button class="nav-btn" data-tab="profile" onclick="go('profile')">
+      <span class="nav-ico">👤</span>
+      <span class="nav-lbl">Profile</span>
+    </button>
+    <button class="nav-btn" data-tab="premium" onclick="go('premium')">
+      <span class="nav-ico">👑</span>
+      <span class="nav-lbl">Premium</span>
+    </button>
+  </nav>
+
+</div><!-- /app -->
+
+<!-- =============================================
+     JAVASCRIPT
+     ============================================= -->
+<script>
+// ─────────────────────────────────────────────
+// CONFIG  (change PREM_CODE to your private code)
+// ─────────────────────────────────────────────
+const PREM_CODE  = 'NCPREM49';          // ← your secret unlock code
+const WA_NUMBER  = '27655476224';       // ← your WhatsApp number
+
+// ─────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────
+let isPremium = localStorage.getItem('nc_premium') === 'true';
+
+// Water – daily reset
+const TODAY    = new Date().toDateString();
+const lastDay  = localStorage.getItem('nc_water_day');
+if (lastDay !== TODAY) {
+  localStorage.setItem('nc_water', '0');
+  localStorage.setItem('nc_water_day', TODAY);
+}
+let glasses = parseInt(localStorage.getItem('nc_water') || '0');
+
+// ─────────────────────────────────────────────
+// DATA: MEALS (45 items across 6 categories)
+// ─────────────────────────────────────────────
+const MEALS = [
+  {
+    cat: '🌽 Mzansi Staples',
+    items: [
+      { e:'🌽', n:'Pap',            d:'Soft maize porridge — the heart of every SA table',      c:'~130 kcal/cup'      },
+      { e:'🫘', n:'Chakalaka',      d:'Spicy bean & vegetable relish — pap\'s best friend',     c:'~85 kcal/serving'   },
+      { e:'🌾', n:'Umngqusho',      d:'Samp & beans — Madiba\'s favourite dish',                c:'~220 kcal/cup'      },
+      { e:'🍚', n:'Phutu',          d:'Dry crumbly pap, perfect with amasi or morogo',          c:'~150 kcal/cup'      },
+      { e:'🌽', n:'Samp',           d:'Slow-cooked dried corn kernels',                         c:'~180 kcal/cup'      },
+      { e:'🎃', n:'Isijingi',       d:'Sweet pumpkin & pap combo',                              c:'~120 kcal/serving'  },
+      { e:'🥛', n:'Umvubo',         d:'Pap mixed with amasi — sour milk comfort',               c:'~160 kcal/serving'  },
+      { e:'🌿', n:'Morogo',         d:'Wild spinach stew, rich in iron & vitamins',             c:'~45 kcal/serving'   },
+      { e:'🥬', n:'Umfino',         d:'Mielie meal cooked with spinach',                        c:'~110 kcal/serving'  },
+      { e:'🍶', n:'Amasi',          d:'Fermented sour milk — probiotic powerhouse',             c:'~90 kcal/cup'       },
+    ]
+  },
+  {
+    cat: '🔥 Braai & Meat',
+    items: [
+      { e:'🌀', n:'Boerewors',      d:'Spiced coiled sausage — the braai essential',            c:'~310 kcal/link'     },
+      { e:'🥩', n:'Braai Chops',    d:'Flame-grilled lamb or pork chops over hot coals',       c:'~280 kcal/chop'     },
+      { e:'🍢', n:'Sosaties',       d:'Cape Malay marinated meat skewers',                      c:'~240 kcal/skewer'   },
+      { e:'🍲', n:'Potjiekos',      d:'Slow-cooked pot stew over fire — Sunday special',       c:'~350 kcal/serving'  },
+      { e:'🍖', n:'Frikkadelle',    d:'SA-style spiced fried meatballs',                        c:'~180 kcal/2 balls'  },
+      { e:'🫀', n:'Mogodu',         d:'Tripe in rich tomato & onion gravy',                    c:'~200 kcal/serving'  },
+      { e:'🥓', n:'Biltong',        d:'Spiced dried beef or game meat snack',                  c:'~160 kcal/50g'      },
+      { e:'🐔', n:'Walkie Talkies', d:'Grilled chicken feet & heads — kasi classic',           c:'~140 kcal/serving'  },
+      { e:'🐟', n:'Snoek Braai',    d:'Traditional flame-grilled Cape snoek',                  c:'~220 kcal/serving'  },
+      { e:'🐓', n:'Umleqwa',        d:'Free-range chicken slow stew — full of flavour',        c:'~290 kcal/serving'  },
+    ]
+  },
+  {
+    cat: '🛒 Street Food & Kasi',
+    items: [
+      { e:'🍞', n:'Bunny Chow',     d:'Hollowed bread loaf filled with hot curry',             c:'~520 kcal/quarter'  },
+      { e:'🫓', n:'Vetkoek',        d:'Deep-fried dough filled with spiced mince',             c:'~380 kcal/piece'    },
+      { e:'🥖', n:'Gatsby',         d:'Cape Town\'s legendary overstuffed sub sandwich',       c:'~650 kcal/half'     },
+      { e:'🍩', n:'Amagwinya',      d:'Fat cakes — deep-fried dough balls',                    c:'~250 kcal/piece'    },
+      { e:'🍞', n:'Kota',           d:'Quarter-loaf filled with chips, polony, egg & sauce',  c:'~580 kcal'          },
+      { e:'🌮', n:'Pap en Wors',    d:'Pap with boerewors — the ultimate braai combo',        c:'~440 kcal'          },
+      { e:'🍟', n:'Spatlou',        d:'Township mix: chips, polony, cheese & sauce',          c:'~490 kcal'          },
+      { e:'🥚', n:'Walkie Talkies Boiled', d:'Boiled chicken feet in tomato & onion',        c:'~130 kcal/serving'  },
+    ]
+  },
+  {
+    cat: '🌶️ Heritage & Cape Malay',
+    items: [
+      { e:'🫕', n:'Bobotie',        d:'Cape Malay spiced mince with egg topping',              c:'~340 kcal/serving'  },
+      { e:'🍛', n:'Cape Malay Curry',d:'Aromatic curry with golden spices & dried fruit',     c:'~380 kcal/serving'  },
+      { e:'🍚', n:'Breyani',        d:'Layered spiced rice with meat & lentils',               c:'~420 kcal/serving'  },
+      { e:'🍋', n:'Geel Rys',       d:'Sweet yellow rice with raisins & turmeric',            c:'~210 kcal/cup'      },
+      { e:'🌾', n:'Ingqolowa',      d:'Wheat grain porridge — wholesome & filling',           c:'~180 kcal/cup'      },
+      { e:'🍺', n:'Ting',           d:'Fermented sorghum porridge — tangy & probiotic',       c:'~140 kcal/cup'      },
+      { e:'🍛', n:'Durban Curry',   d:'Fiery Durban-style mutton or chicken curry',           c:'~390 kcal/serving'  },
+    ]
+  },
+  {
+    cat: '🍬 Snacks & Sweets',
+    items: [
+      { e:'🥩', n:'Droëwors',       d:'Thin dried sausage snack — biltong\'s cousin',         c:'~150 kcal/50g'      },
+      { e:'🐛', n:'Mopane Worms',   d:'Dried caterpillars — protein-rich Limpopo delicacy',   c:'~120 kcal/50g'      },
+      { e:'🌽', n:'Stampmielies',   d:'Stamped & dried corn kernels',                         c:'~190 kcal/cup'      },
+      { e:'🥧', n:'Malva Pudding',  d:'Sweet sticky apricot jam baked pudding',               c:'~380 kcal/slice'    },
+      { e:'🥧', n:'Melktert',       d:'Cinnamon spiced milk tart — Cape classic',             c:'~290 kcal/slice'    },
+      { e:'🍩', n:'Koeksister',     d:'Twisted deep-fried syrupy dough',                      c:'~340 kcal/piece'    },
+      { e:'🎂', n:'Peppermint Crisp Tart', d:'No-bake fridge tart — braai dessert staple',   c:'~310 kcal/slice'    },
+      { e:'🫐', n:'Hertzoggies',    d:'Apricot jam tarts with coconut topping',               c:'~190 kcal/piece'    },
+    ]
+  },
+  {
+    cat: '🌅 Breakfast',
+    items: [
+      { e:'🍳', n:'Uphuthu',        d:'Crumbly breakfast pap — light, dry & satisfying',      c:'~140 kcal/cup'      },
+      { e:'🫙', n:'Sour Porridge',  d:'Fermented sorghum — probiotic morning starter',        c:'~130 kcal/cup'      },
+      { e:'🍯', n:'Vetkoek & Jam',  d:'Morning fat cake with apricot jam',                    c:'~300 kcal/piece'    },
+      { e:'🥣', n:'Mealie Porridge',d:'Smooth warm mealie pap with sugar & milk',             c:'~180 kcal/bowl'     },
+      { e:'🍌', n:'Amasi & Fruit',  d:'Amasi with banana or mango — quick power start',       c:'~160 kcal/bowl'     },
+    ]
+  }
+];
+
+// ─────────────────────────────────────────────
+// DATA: RECIPES (7 detailed)
+// ─────────────────────────────────────────────
+const RECIPES = [
+  {
+    e:'🌽', n:'Perfect Soft Pap',
+    tags:['Vegetarian','Staple','Easy'], time:'25 min', srv:'4',
+    ingr:['2 cups maize meal (mealie meal)','3 cups water','1 tsp salt','1 tbsp butter (optional)'],
+    steps:[
+      'Bring 3 cups water to a boil in a heavy-bottomed pot. Add salt.',
+      'Slowly pour maize meal in a steady stream while stirring to prevent lumps.',
+      'Reduce heat to the lowest setting. Cover with a lid.',
+      'Cook 20 minutes, stirring every 5 min and scraping the bottom.',
+      'Pap is ready when it pulls cleanly from the sides of the pot. Stir in butter if using. Serve hot.'
+    ]
+  },
+  {
+    e:'🫘', n:'Chakalaka',
+    tags:['Vegan','Spicy','20 min'], time:'20 min', srv:'6',
+    ingr:['1 can baked beans (410g)','2 carrots, grated','1 large onion, chopped','1 green pepper, chopped','2 garlic cloves, minced','1 tsp curry powder','1 chilli (optional)','Salt & pepper to taste','2 tbsp cooking oil'],
+    steps:[
+      'Heat oil in a pan over medium heat. Fry onion and garlic for 3 minutes until soft and golden.',
+      'Add green pepper, chilli, and grated carrots. Stir-fry for 5 minutes.',
+      'Add curry powder. Stir continuously for 1 minute to toast the spice.',
+      'Pour in baked beans and mix everything together.',
+      'Season with salt and pepper. Simmer uncovered for 8 minutes. Serve with pap or bread.'
+    ]
+  },
+  {
+    e:'🌀', n:'Braai Boerewors',
+    tags:['Meat','Braai','Classic'], time:'20 min', srv:'4',
+    ingr:['1 kg boerewors (coiled or straight)','Braai tongs','Hot coals or gas grill'],
+    steps:[
+      'Light your braai and let coals burn to a medium-hot grey ash stage — no open flames.',
+      'Place boerewors flat on the grid. Do NOT pierce the skin — you\'ll lose the juices.',
+      'Cook on one side for 7–8 minutes without moving it.',
+      'Flip ONCE using tongs. Never use a fork.',
+      'Cook the other side for 6–7 minutes. Remove and rest 2 minutes before serving.'
+    ]
+  },
+  {
+    e:'🍞', n:'Bunny Chow',
+    tags:['Street Food','Curry','Filling'], time:'45 min', srv:'4',
+    ingr:['1 loaf unsliced white bread','500g chicken pieces or mutton','1 large onion, chopped','2 tomatoes, chopped','3 tbsp curry powder','1 tsp turmeric','2 garlic cloves, minced','1 tsp ginger','1 cup water','Salt & oil'],
+    steps:[
+      'Heat oil, fry onion and garlic until golden. Add curry powder, turmeric, and ginger.',
+      'Add meat, brown for 5 minutes on all sides.',
+      'Add tomatoes and 1 cup water. Simmer 25–30 minutes until meat is tender and sauce is thick.',
+      'Cut bread loaf into halves or quarters. Use your fist to hollow out the centre (keep the bread lid).',
+      'Spoon hot curry into the hollowed bread. Place the bread lid on top. Serve immediately and eat with your hands.'
+    ]
+  },
+  {
+    e:'🫕', n:'Bobotie',
+    tags:['Cape Malay','Heritage','Oven'], time:'60 min', srv:'6',
+    ingr:['750g beef mince','2 slices white bread, soaked in milk','1 onion, chopped','2 tbsp curry powder','2 tbsp apricot jam','2 tbsp fruit chutney','1 tsp turmeric','2 eggs','1 cup milk','4–5 bay leaves','Salt & cooking oil'],
+    steps:[
+      'Preheat oven to 180°C. Fry onion until golden. Add curry powder and turmeric, stir 1 minute.',
+      'Add mince, brown well breaking up lumps. Stir in jam, chutney, and squeezed bread. Season with salt.',
+      'Spoon the mince mixture into a greased 28cm baking dish. Press down firmly and level the top.',
+      'Beat 2 eggs with 1 cup milk and a pinch of turmeric. Pour the egg custard over the meat.',
+      'Press bay leaves into the surface. Bake 35–40 minutes until the egg topping is set and golden.'
+    ]
+  },
+  {
+    e:'🍩', n:'Amagwinya (Fat Cakes)',
+    tags:['Street Food','Fried','Kasi'], time:'35 min', srv:'8',
+    ingr:['2 cups cake flour','1 packet (10g) instant yeast','1 tsp white sugar','½ tsp salt','¾ cup warm water','Oil for deep frying'],
+    steps:[
+      'Mix flour, instant yeast, sugar, and salt in a large bowl.',
+      'Add warm water gradually and mix into a soft, slightly sticky dough.',
+      'Knead on a floured surface for 5 minutes until smooth.',
+      'Cover with a damp cloth and rest 15–20 minutes until slightly risen.',
+      'Heat oil in a deep pan to 180°C. Shape dough into golf-ball-sized rounds. Fry in batches until deep golden brown, about 3–4 minutes per side. Drain on paper towels.'
+    ]
+  },
+  {
+    e:'🥧', n:'Malva Pudding',
+    tags:['Dessert','Baked','Sweet'], time:'45 min', srv:'8',
+    ingr:['1 cup flour','1 cup sugar','1 egg','1 tbsp apricot jam','1 tsp bicarbonate of soda','1 tbsp soft butter','1 cup milk','Pinch salt','SAUCE: 1 cup cream, ½ cup butter, ½ cup sugar, ½ cup hot water'],
+    steps:[
+      'Preheat oven to 180°C. Beat egg and sugar until pale and fluffy.',
+      'Add apricot jam and melted butter. Mix in milk, then sift in flour, bicarb, and salt.',
+      'Pour batter into a well-greased 30cm baking dish. Bake 30–35 minutes until dark golden.',
+      'While it bakes, heat sauce ingredients in a saucepan until sugar dissolves. Do not boil.',
+      'Immediately out of the oven, pour all the hot sauce over the hot pudding. Let it soak 10 min before serving with custard or ice cream.'
+    ]
+  }
+];
+
+// ─────────────────────────────────────────────
+// DATA: QUICK MEALS
+// ─────────────────────────────────────────────
+const QUICK = [
+  { e:'🥚', n:'Eggs on Toast',        t:'5 min',  d:'Scrambled or fried eggs on buttered bread' },
+  { e:'🍜', n:'2-Min Noodles',         t:'2 min',  d:'Indomie or Nissin with egg & onion stirred in' },
+  { e:'🥪', n:'Polony Sandwich',       t:'3 min',  d:'Polony, cheese, tomato, sauce on white bread' },
+  { e:'🍳', n:'Fried Pap & Egg',       t:'8 min',  d:'Leftover pap fried in butter with a fried egg' },
+  { e:'🫙', n:'Amasi & Pap',           t:'5 min',  d:'Cold amasi poured over soft or phutu pap' },
+  { e:'🧀', n:'Cheese Toastie',        t:'5 min',  d:'Melted cheese & tomato on grilled bread' },
+  { e:'🥫', n:'Tin Fish & Rice',       t:'15 min', d:'Pilchards or tuna with rice & fresh tomato' },
+  { e:'🍚', n:'Rice & Oxo Gravy',      t:'10 min', d:'White rice with Oxo gravy & frozen mixed veg' },
+  { e:'🌽', n:'Quick Pap & Beans',     t:'10 min', d:'Instant pap with canned baked beans' },
+  { e:'🍌', n:'Banana & Peanut Butter',t:'1 min',  d:'Quick energy snack — banana sliced with PB' },
+  { e:'🧄', n:'Garlic Bread',          t:'5 min',  d:'White bread with garlic butter, toasted golden' },
+  { e:'🥜', n:'Peanut Butter Pap',     t:'8 min',  d:'Sweet pap topped with peanut butter & honey' },
+];
+
+// ─────────────────────────────────────────────
+// NAVIGATION
+// ─────────────────────────────────────────────
+function go(tab) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('sec-' + tab).classList.add('active');
+  document.querySelector('[data-tab="' + tab + '"]').classList.add('active');
+  document.getElementById('scroll-area').scrollTop = 0; // scroll to top
+}
+
+// ─────────────────────────────────────────────
+// GREETING
+// ─────────────────────────────────────────────
+function updateGreeting() {
+  const name = localStorage.getItem('nc_name') || null;
+  const h    = new Date().getHours();
+  const g    = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+  const tips = [
+    'Stay hydrated & eat well today.',
+    'A healthy you is a wealthy you.',
+    'Fuel your body. Fuel your dreams.',
+    'Consistency beats perfection.',
+    'Your health is your first wealth.',
+    'Grind today. Shine tomorrow.',
+  ];
+  document.getElementById('greetName').textContent = g + (name ? ', ' + name : ', Champ') + '! 👋';
+  document.getElementById('greetSub').textContent  = tips[Math.floor(Math.random() * tips.length)];
+
+  const w = parseFloat(localStorage.getItem('nc_weight') || '0');
+  if (w > 0) document.getElementById('statCals').textContent = Math.round(w * 30) + ' kcal';
+}
+
+// ─────────────────────────────────────────────
+// WATER
+// ─────────────────────────────────────────────
+function renderWater() {
+  document.getElementById('waterNum').textContent = glasses;
+  document.getElementById('waterPill').textContent = '💧 ' + glasses + '/8 glasses';
+  const row = document.getElementById('glassesRow');
+  row.innerHTML = '';
+  for (let i = 0; i < 8; i++) {
+    const s = document.createElement('span');
+    s.className = 'g-icon' + (i < glasses ? ' on' : '');
+    s.textContent = '🥛';
+    row.appendChild(s);
+  }
+}
+
+function addWater() {
+  if (glasses < 8) { glasses++; save(); renderWater(); }
+}
+function remWater() {
+  if (glasses > 0) { glasses--; save(); renderWater(); }
+}
+function save() { localStorage.setItem('nc_water', glasses); }
+
+// ─────────────────────────────────────────────
+// BMI
+// ─────────────────────────────────────────────
+function calcBMI() {
+  const w = parseFloat(document.getElementById('bmiW').value);
+  const h = parseFloat(document.getElementById('bmiH').value) / 100;
+  if (!w || !h || h <= 0 || w <= 0) return;
+  const bmi = (w / (h * h)).toFixed(1);
+  let cat, color, tip;
+  if      (bmi < 18.5) { cat = 'Underweight';         color = '#4fc3f7'; tip = 'Eat more nutritious meals & increase calorie intake.'; }
+  else if (bmi < 25)   { cat = '✓ Normal & Healthy';  color = 'var(--green)'; tip = 'Great! Maintain this range with balanced meals.'; }
+  else if (bmi < 30)   { cat = 'Overweight';           color = 'var(--gold)'; tip = 'Reduce portion sizes & add more vegetables.'; }
+  else                  { cat = 'Obese – take action'; color = 'var(--red)';  tip = 'Speak to a health professional & start small changes.'; }
+
+  const box = document.getElementById('bmiBox');
+  document.getElementById('bmiNum').textContent = bmi;
+  document.getElementById('bmiNum').style.color = color;
+  document.getElementById('bmiCat').textContent = cat;
+  document.getElementById('bmiCat').style.color = color;
+  document.getElementById('bmiTip').textContent = tip;
+  box.style.display = 'block';
+}
+
+// ─────────────────────────────────────────────
+// RENDER MEALS
+// ─────────────────────────────────────────────
+function renderMeals(filter) {
+  const q = (filter || '').toLowerCase();
+  const el = document.getElementById('mealsContainer');
+  el.innerHTML = '';
+  MEALS.forEach(cat => {
+    const items = cat.items.filter(m => !q || m.n.toLowerCase().includes(q) || m.d.toLowerCase().includes(q));
+    if (!items.length) return;
+    const sec = document.createElement('div');
+    sec.className = 'cat-group';
+    sec.innerHTML = '<div class="cat-label">' + cat.cat + '</div>';
+    const grid = document.createElement('div');
+    grid.className = 'meal-grid';
+    items.forEach(m => {
+      grid.innerHTML += `<div class="meal-tile"><div class="m-emoji">${m.e}</div><div class="m-name">${m.n}</div><div class="m-desc">${m.d}</div><div class="m-cals">${m.c}</div></div>`;
+    });
+    sec.appendChild(grid);
+    el.appendChild(sec);
+  });
+}
+function filterMeals() { renderMeals(document.getElementById('mealSearch').value); }
+
+// ─────────────────────────────────────────────
+// RENDER RECIPES
+// ─────────────────────────────────────────────
+function renderRecipes() {
+  const el = document.getElementById('recipeContainer');
+  el.innerHTML = '';
+  RECIPES.forEach((r, i) => {
+    const pillsHTML  = r.tags.map((t, ti) => `<span class="rc-pill ${ti===0?'g':''}">${t}</span>`).join('');
+    const ingrHTML   = r.ingr.map(x => `<div class="ingr">${x}</div>`).join('');
+    const stepsHTML  = r.steps.map((s, si) => `<div class="step-row"><div class="step-n">${si+1}</div><div>${s}</div></div>`).join('');
+    const card = document.createElement('div');
+    card.className = 'recipe-card';
+    card.innerHTML = `
+      <div class="rc-head" onclick="toggleRecipe(${i})">
+        <span class="rc-emo">${r.e}</span>
+        <div class="rc-meta">
+          <div class="rc-name">${r.n}</div>
+          <div class="rc-pills">${pillsHTML}</div>
+          <div class="rc-info">⏱ ${r.time} &nbsp;·&nbsp; 🍽 ${r.srv} servings</div>
+        </div>
+        <span class="rc-arrow">▾</span>
+      </div>
+      <div class="rc-body">
+        <div class="rc-stitle">Ingredients</div>
+        <div class="ingr-list">${ingrHTML}</div>
+        <div class="rc-stitle">Method</div>
+        <div class="steps-list">${stepsHTML}</div>
+      </div>`;
+    el.appendChild(card);
+  });
+}
+function toggleRecipe(i) {
+  document.querySelectorAll('.recipe-card')[i].classList.toggle('open');
+}
+
+// ─────────────────────────────────────────────
+// RENDER QUICK
+// ─────────────────────────────────────────────
+function renderQuick() {
+  document.getElementById('quickGrid').innerHTML = QUICK.map(q =>
+    `<div class="q-tile"><div class="q-emo">${q.e}</div><div class="q-name">${q.n}</div><div class="q-time">⏱ ${q.t}</div><div class="q-desc">${q.d}</div></div>`
+  ).join('');
+}
+
+// ─────────────────────────────────────────────
+// PROFILE
+// ─────────────────────────────────────────────
+function saveProfile() {
+  const name   = document.getElementById('pName').value.trim();
+  const age    = document.getElementById('pAge').value.trim();
+  const weight = document.getElementById('pWeight').value.trim();
+  const height = document.getElementById('pHeight').value.trim();
+  if (name)   localStorage.setItem('nc_name',   name);
+  if (age)    localStorage.setItem('nc_age',    age);
+  if (weight) localStorage.setItem('nc_weight', weight);
+  if (height) localStorage.setItem('nc_height', height);
+  loadProfile();
+  updateGreeting();
+  alert('✅ Profile saved, ' + (name || 'champ') + '!');
+}
+
+function loadProfile() {
+  const name   = localStorage.getItem('nc_name')   || '';
+  const age    = localStorage.getItem('nc_age')    || '';
+  const weight = localStorage.getItem('nc_weight') || '';
+  const height = localStorage.getItem('nc_height') || '';
+
+  if (name)   document.getElementById('pName').value   = name;
+  if (age)    document.getElementById('pAge').value    = age;
+  if (weight) document.getElementById('pWeight').value = weight;
+  if (height) document.getElementById('pHeight').value = height;
+
+  document.getElementById('profNameDisp').textContent = name || 'Your Name';
+  document.getElementById('profAgeBadge').textContent = age ? 'Age ' + age : 'Age —';
+
+  if (weight && height) {
+    const h   = parseFloat(height) / 100;
+    const w   = parseFloat(weight);
+    const bmi = (w / (h * h)).toFixed(1);
+    const cal = Math.round(w * 30);
+    document.getElementById('ps-bmi').textContent  = bmi;
+    document.getElementById('ps-cals').textContent = cal;
+    document.getElementById('profStatsCard').style.display = 'block';
+    document.getElementById('statCals').textContent = cal + ' kcal';
+  }
+}
+
+// ─────────────────────────────────────────────
+// PREMIUM
+// ─────────────────────────────────────────────
+function updatePremUI() {
+  const active  = document.getElementById('premActiveSc');
+  const upgrade = document.getElementById('premUpgradeSc');
+  const badge   = document.getElementById('premBadge');
+  if (isPremium) {
+    active.classList.add('show');
+    upgrade.style.display = 'none';
+    badge.style.display   = 'inline-block';
+  } else {
+    active.classList.remove('show');
+    upgrade.style.display = 'block';
+    badge.style.display   = 'none';
+  }
+}
+
+function openWA() {
+  const name = localStorage.getItem('nc_name') || 'Customer';
+  const msg  = encodeURIComponent(
+    'Hi! My name is ' + name + '. I have paid R49 for NutriCore Premium (Freedomverse). ' +
+    'Sending my proof of payment now. Please send my unlock code. Thank you!'
+  );
+  window.open('https://wa.me/' + WA_NUMBER + '?text=' + msg, '_blank');
+}
+
+function tryUnlock() {
+  const code = document.getElementById('codeInput').value.trim().toUpperCase();
+  const msg  = document.getElementById('unlockMsg');
+  if (code === PREM_CODE) {
+    isPremium = true;
+    localStorage.setItem('nc_premium', 'true');
+    msg.className = 'unlock-msg ok';
+    msg.textContent = '🎉 Premium unlocked! Welcome to Freedomverse.';
+    setTimeout(updatePremUI, 1200);
+  } else {
+    msg.className = 'unlock-msg err';
+    msg.textContent = '❌ Wrong code. Check your WhatsApp message.';
+  }
+}
+
+function revokePrem() {
+  if (confirm('Remove Premium access from this device?')) {
+    isPremium = false;
+    localStorage.removeItem('nc_premium');
+    updatePremUI();
+  }
+}
+
+// ─────────────────────────────────────────────
+// SERVICE WORKER (Blob method — works in single HTML file)
+// ─────────────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  const swSrc = `
+    const CACHE = 'nutricore-v2';
+    self.addEventListener('install', () => self.skipWaiting());
+    self.addEventListener('activate', e => e.waitUntil(clients.claim()));
+    self.addEventListener('fetch', e => {
+      e.respondWith(
+        caches.open(CACHE).then(cache =>
+          cache.match(e.request).then(cached => {
+            const network = fetch(e.request).then(resp => {
+              if (resp && resp.status === 200) cache.put(e.request, resp.clone());
+              return resp;
+            }).catch(() => cached);
+            return cached || network;
+          })
+        )
+      );
+    });
+  `;
+  try {
+    const blob   = new Blob([swSrc], { type: 'application/javascript' });
+    const swURL  = URL.createObjectURL(blob);
+    navigator.serviceWorker.register(swURL).catch(() => {});
+  } catch(e) { /* SW not critical */ }
+}
+
+// ─────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  // Hide splash after animation
+  setTimeout(() => document.getElementById('splash').classList.add('hide'), 2700);
+
+  // Render all sections
+  renderWater();
+  renderMeals();
+  renderRecipes();
+  renderQuick();
+  loadProfile();
+  updateGreeting();
+  updatePremUI();
+});
+</script>
+
+</body>
+</html>
