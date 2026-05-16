@@ -600,9 +600,27 @@ button { cursor: pointer; }
       <div class="card">
         <div class="c-label">💧 Daily Water Tracker</div>
         <div class="water-num" id="waterNum">0</div>
-        <div class="water-sub">glasses out of 8 today</div>
-        <div class="glasses-row" id="glassesRow"></div>
-        <div class="water-btns">
+        <div class="water-groups-container">
+    
+    <div class="water-group-col">
+        <div class="glasses-group-row" id="morningGlasses">
+            </div>
+        <div class="water-group-label">|__Morning___|</div>
+    </div>
+
+    <div class="water-group-col">
+        <div class="glasses-group-row" id="afternoonGlasses">
+            </div>
+        <div class="water-group-label">|__Afternoon__|</div>
+    </div>
+
+    <div class="water-group-col">
+        <div class="glasses-group-row" id="eveningGlasses">
+            </div>
+        <div class="water-group-label">|__Evening___|</div>
+    </div>
+
+</div>
           <button class="btn-water btn-add" onclick="addWater()">+ Add Glass</button>
           <button class="btn-water btn-rem" onclick="remWater()">– Remove</button>
         </div>
