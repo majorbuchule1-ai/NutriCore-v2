@@ -600,29 +600,10 @@ button { cursor: pointer; }
       <div class="card">
         <div class="c-label">💧 Daily Water Tracker</div>
         <div class="water-num" id="waterNum">0</div>
-        <div class="water-groups-container">
-    
-    <div class="water-group-col">
-        <div class="glasses-group-row" id="morningGlasses">
-    <div class="water-groups-container">
-    
-    <div class="water-group-col">
-        <div class="glasses-group-row" id="morningGlasses"></div>
-        <div class="water-group-label"> 🌄 Morning </div>
-    </div>
-
-    <div class="water-group-col">
-        <div class="glasses-group-row" id="afternoonGlasses"></div>
-        <div class="water-group-label"> ☀️ Afternoon </div>
-    </div>
-
-    <div class="water-group-col">
-        <div class="glasses-group-row" id="eveningGlasses"></div>
-        <div class="water-group-label"> 🌃 Evening </div>
-    </div>
-
-</div>
-
+        <div class="water-sub">glasses out of 8 today</div>
+        <div class="glasses-row" id="glassesRow"></div>
+        <div class="water-btns">
+          <button class="btn-water btn-add" onclick="addWater()">+ Add Glass</button>
           <button class="btn-water btn-rem" onclick="remWater()">– Remove</button>
         </div>
       </div>
@@ -1367,4 +1348,4 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 
 </body>
-</html>
+           </html>
